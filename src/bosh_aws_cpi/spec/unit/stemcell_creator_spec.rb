@@ -5,12 +5,12 @@ module Bosh::AwsCloud
     let(:ec2_resource) { instance_double(Aws::EC2::Resource) }
     let(:properties) do
       {
-          'name' => 'stemcell-name',
-          'version' => '0.7.0',
-          'infrastructure' => 'aws',
-          'architecture' => 'x86_64',
-          'root_device_name' => '/dev/sda1',
-          'virtualization_type' => virtualization_type
+        'name' => 'stemcell-name',
+        'version' => '0.7.0',
+        'infrastructure' => 'aws',
+        'architecture' => 'x86_64',
+        'root_device_name' => '/dev/sda1',
+        'virtualization_type' => virtualization_type,
       }
     end
     let(:virtualization_type) {'paravirtual'}
@@ -111,6 +111,27 @@ module Bosh::AwsCloud
             },
           ])
           expect(params[:virtualization_type]).to eq('hvm')
+          expect(params[:ena_support]).to eq(false)
+        end
+
+        context 'and ena_support is enabled' do
+          let(:properties) do
+            {
+              'name' => 'stemcell-name',
+              'version' => '0.7.0',
+              'infrastructure' => 'aws',
+              'architecture' => 'x86_64',
+              'root_device_name' => '/dev/sda1',
+              'virtualization_type' => virtualization_type,
+              'ena_support' => true,
+            }
+          end
+
+          it 'should set ena_support to true' do
+            params = described_class.new(ec2_resource, stemcell_cloud_props).send(:image_params, 'id')
+
+            expect(params[:ena_support]).to eq(true)
+          end
         end
       end
     end
