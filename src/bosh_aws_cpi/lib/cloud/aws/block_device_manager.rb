@@ -27,14 +27,14 @@ module Bosh::AwsCloud
 
     def self.requires_nvme_device(instance_type)
       instance_type = instance_type.nil? ? 'unspecified' : instance_type
-      instance_type =~ /^[cm]5\./
+      instance_type =~ /^(c5|m5|r5d)\./
     end
 
     private
 
     def mappings(info)
       instance_type = @vm_cloud_props.instance_type.nil? ? 'unspecified' : @vm_cloud_props.instance_type
-      if instance_type =~ /^i3\./
+      if instance_type =~ /^(i3|r5d)\./
         info = info.reject { |device| device[:bosh_type] == 'raw_ephemeral' }
       end
 
@@ -126,7 +126,7 @@ module Bosh::AwsCloud
       case @virtualization_type
 
         when 'hvm'
-          if instance_type =~ /^i3\./
+          if instance_type =~ /^(i3|r5d)\./
             '/dev/nvme0n1'
           else
             '/dev/xvdba'
@@ -270,6 +270,13 @@ module Bosh::AwsCloud
 
         'x1.16xlarge' => [1920, 1],
         'x1.32xlarge' => [1920, 2],
+
+        'r5d.large' => [75, 1],
+        'r5d.xlarge' => [150, 1],
+        'r5d.2xlarge' => [300, 1],
+        'r5d.4xlarge' => [300, 2],
+        'r5d.12xlarge' => [900, 2],
+        'r5d.24xlarge' => [900, 4],
       }
 
       attr_reader :size, :count
